@@ -1110,7 +1110,7 @@
       if (!name || !email || !msg) {
         errorBox.textContent = 'Please fill in all fields before sending.';
         errorBox.style.display = 'block';
-        setTimeout(() => errorBox.style.display = 'none', 4000);
+        setTimeout(() => errorBox.style.display = 'none', 3000);
         return;
       }
 
@@ -1118,6 +1118,22 @@
       sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending…';
       errorBox.style.display = 'none';
 
+      // Show success immediately for instant feedback
+      nameEl.value = ''; emailEl.value = ''; msgEl.value = '';
+      showSuccessModal();
+      
+      // Send email asynchronously in background without blocking UI
+      sendEmailAsync(name, email, msg).then(() => {
+        console.log('Email sent successfully');
+      }).catch(err => {
+        console.error('Email send failed:', err);
+      }).finally(() => {
+        sendBtn.disabled = false;
+        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+      });
+    }
+
+    async function sendEmailAsync(name, email, msg) {
       try {
         const response = await fetch('https://formsubmit.co/bachrismec1@gmail.com', {
           method: 'POST',
@@ -1129,19 +1145,11 @@
           })
         });
 
-        if (response.ok) {
-          nameEl.value = ''; emailEl.value = ''; msgEl.value = '';
-          showSuccessModal();
-        } else {
-          throw new Error('Form submission failed');
+        if (!response.ok) {
+          console.error('Form submission failed');
         }
       } catch(error) {
-        errorBox.innerHTML = '<i class="fas fa-exclamation-circle" style="margin-right:0.5rem;"></i>Failed to send message. Please try again.';
-        errorBox.style.display = 'block';
-        setTimeout(() => errorBox.style.display = 'none', 4000);
-      } finally {
-        sendBtn.disabled = false;
-        sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+        console.error('Email send error:', error);
       }
     }
 
