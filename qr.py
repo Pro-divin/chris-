@@ -30,13 +30,13 @@ OUTPUT = Path(__file__).with_name("chris_portfolio_qr.png")
 LOGO_PATH = Path(r"C:\Users\peril ops\Desktop\chris\Gemini_Generated_Image_5d4l1q5d4l1q5d4l-removebg-preview.png")
 
 
-# Brand palette (gold colors)
-CENTER_COLOR = (255, 215, 0)      # gold
-EDGE_COLOR = (184, 134, 11)       # dark gold
-BACK_COLOR = (255, 255, 255)
-CARD_BG = (255, 255, 255)
-PAGE_BG_TOP = (245, 247, 255)
-PAGE_BG_BOTTOM = (255, 240, 250)
+# Brand palette (bright white-to-gold for black background)
+CENTER_COLOR = (255, 255, 255)    # white center
+EDGE_COLOR = (255, 215, 0)        # gold edges
+BACK_COLOR = (255, 255, 255)      # white empty spaces (will convert to black)
+CARD_BG = (0, 0, 0)               # black background
+PAGE_BG_TOP = (0, 0, 0)           # black
+PAGE_BG_BOTTOM = (0, 0, 0)        # black
 
 
 def make_qr_image() -> Image.Image:
@@ -44,7 +44,7 @@ def make_qr_image() -> Image.Image:
     qr = qrcode.QRCode(
         version=None,
         error_correction=ERROR_CORRECT_H,  # high EC so center logo is safe
-        box_size=18,
+        box_size=20,
         border=2,
     )
     qr.add_data(URL)
@@ -59,6 +59,18 @@ def make_qr_image() -> Image.Image:
             edge_color=EDGE_COLOR,
         ),
     ).convert("RGBA")
+    
+    # Convert white spaces to black
+    data = img.getdata()
+    new_data = []
+    for item in data:
+        # If pixel is white (255, 255, 255), convert to black (0, 0, 0)
+        if item[0] > 240 and item[1] > 240 and item[2] > 240:
+            new_data.append((0, 0, 0, item[3]))
+        else:
+            new_data.append(item)
+    img.putdata(new_data)
+    
     return img
 
 
